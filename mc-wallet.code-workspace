@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "mc-wallet-lib"
+		},
+		{
+			"path": "mc-wallet-lib-rs"
+		},
+		{
+			"path": "mc-wallet-fabric"
+		}
+	],
+	"settings": {
+		"java.compile.nullAnalysis.mode": "automatic",
+		"java.configuration.updateBuildConfiguration": "automatic"
+	}
+}
