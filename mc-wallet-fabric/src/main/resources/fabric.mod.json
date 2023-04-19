@@ -18,6 +18,9 @@
 		"main": [
 			"dev.mucks.mc_wallet.McWallet"
 		],
+		"client": [
+			"dev.mucks.mc_wallet.McWalletClient"
+		],
 		"fabric-datagen": [
 			"dev.mucks.mc_wallet.McWalletDataGenerator"
 		]

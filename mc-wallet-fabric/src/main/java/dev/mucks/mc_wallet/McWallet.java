@@ -15,6 +15,7 @@ public class McWallet implements ModInitializer {
 	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger("mc-wallet");
 	public static final String MOD_ID = "mc-wallet";
+	public static final McWalletLib MOD_LIB = new McWalletLib();
 
 	@Override
 	public void onInitialize() {
@@ -23,11 +24,5 @@ public class McWallet implements ModInitializer {
 		ModItemGroup.registerItemGroups();
 		ModItems.registerModItems();
 
-		McWalletLib lib = new McWalletLib();
-		String mnemonic = lib.createMnemonicRust();
-
-		lib.createConfigDir();
-
-		LOGGER.info("Mnemonic: " + mnemonic);
 	}
 }
