@@ -16,10 +16,10 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"dev.mucks.mc_wallet.McWalletMod"
+			"dev.mucks.mc_wallet.McWallet"
 		],
 		"fabric-datagen": [
-			"dev.mucks.mc_wallet.McWalletModDataGenerator"
+			"dev.mucks.mc_wallet.McWalletDataGenerator"
 		]
 	},
 	"mixins": [

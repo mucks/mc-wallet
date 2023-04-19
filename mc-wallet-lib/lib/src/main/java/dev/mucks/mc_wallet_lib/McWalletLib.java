@@ -19,6 +19,8 @@ public class McWalletLib {
         return libPath;
     }
 
+    public native int createConfigDir();
+
     public native int doubleRust(int input);
 
     public native String createMnemonicRust();

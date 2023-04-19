@@ -23,4 +23,10 @@ class McWalletLibTest {
         assertTrue(mnemonic.length() > 0);
     }
 
+    @Test
+    void createConfigDir() {
+        McWalletLib lib = new McWalletLib();
+        lib.createConfigDir();
+    }
+
 }
