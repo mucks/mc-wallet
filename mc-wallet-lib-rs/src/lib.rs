@@ -4,9 +4,13 @@ use anyhow::{anyhow, Result};
 use bip32::{Mnemonic, Seed, XPrv};
 use rand_core::OsRng;
 use serde::{Deserialize, Serialize};
+use util::mc_wallet_dir;
 
+mod account;
 mod crypto;
 mod java;
+mod storage;
+mod util;
 
 pub fn create_mnemonic() -> String {
     let mnemonic = Mnemonic::random(OsRng, Default::default());
@@ -44,12 +48,6 @@ pub fn save_seed(seed: &Seed, encryption_password: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn mc_wallet_dir() -> Result<std::path::PathBuf> {
-    let config_dir = dirs::config_dir().ok_or_else(|| anyhow!("could not get config dir!"))?;
-    let mc_wallet_dir = config_dir.join("mc-wallet");
-    Ok(mc_wallet_dir)
-}
-
 pub fn get_seed(encryption_password: &str) -> Result<Seed> {
     let seed_file = mc_wallet_dir()?.join("seed");
     let encrypted_seed_hex = std::fs::read_to_string(seed_file)?;
@@ -63,37 +61,11 @@ pub fn get_seed(encryption_password: &str) -> Result<Seed> {
     Ok(Seed::new(seed_bytes_fixed))
 }
 
-pub fn create_eth_account(seed: &Seed) -> Result<()> {
-    let child_path = "m/44'/60'/0'/0/0";
-    create_account(seed, child_path)
-}
-
-pub fn create_account(seed: &Seed, child_path: &str) -> Result<()> {
-    let child_xprv = XPrv::derive_from_path(&seed, &child_path.parse()?)?;
-
-    Ok(())
-}
-
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum CoinType {
     ETH = 60,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Account {
-    pub coin_type: CoinType,
-    pub account: u64,
-}
-
-impl Account {
-    pub fn child_path(&self) -> String {
-        format!("m/44'/{}'/{}'/0/0", self.coin_type as u64, self.account)
-    }
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Storage {
-    pub accounts: Vec<Account>,
+    SOL = 501,
+    SUI = 784,
 }
 
 #[cfg(test)]
