@@ -11,6 +11,10 @@ rand_core = { version = "0.6", features = ["std"] }
 bip32 = "0.5.0"
 dirs = "5.0"
 anyhow = "1"
+hex = "0.4.3"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+ring = "0.16.20"
 
 
 [lib]
