@@ -47,4 +47,13 @@ class McWalletLibTest {
         assertTrue(seed.length() > 0);
     }
 
+    @Test
+    void createWallet() {
+        McWalletLib lib = new McWalletLib();
+        String wallet = lib.createWallet("password");
+        assertNotNull(wallet);
+        assertTrue(wallet.length() > 0);
+        assertTrue(lib.isWalletCreated());
+    }
+
 }

@@ -21,12 +21,14 @@ public class McWalletLib {
 
     public native int createConfigDir();
 
-    public native int doubleRust(int input);
-
     public native String createMnemonic();
 
     public native void createAndSaveSeed(String mnemonic, String seedPassword, String encryptionPassword);
 
     public native String getSeedHex(String encryptionPassword);
+
+    public native String createWallet(String walletPassword);
+
+    public native boolean isWalletCreated();
 
 }

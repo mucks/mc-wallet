@@ -12,6 +12,19 @@ mod java;
 mod storage;
 mod util;
 
+pub fn is_wallet_created() -> bool {
+    let wallet_dir = mc_wallet_dir();
+    wallet_dir.is_ok() && wallet_dir.unwrap().join("seed").exists()
+}
+
+pub fn create_wallet(wallet_password: String) -> Result<String> {
+    create_config_dir()?;
+    let mnemonic = create_mnemonic();
+    let seed = create_seed(&mnemonic, "password")?;
+    save_seed(&seed, &wallet_password)?;
+    Ok(mnemonic)
+}
+
 pub fn create_mnemonic() -> String {
     let mnemonic = Mnemonic::random(OsRng, Default::default());
     mnemonic.phrase().to_string()
@@ -35,6 +48,7 @@ pub fn create_and_save_seed(
 }
 
 pub fn create_seed(mnemonic: &str, password: &str) -> Result<Seed> {
+    create_config_dir()?;
     let mnemonic = Mnemonic::new(mnemonic, Default::default())?;
     let seed = mnemonic.to_seed(password);
     Ok(seed)
@@ -71,6 +85,13 @@ pub enum CoinType {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_create_wallet() {
+        let mnemonic = create_wallet("password".to_string()).expect("could not create wallet");
+        assert_eq!(mnemonic.split_whitespace().count(), 24);
+        assert!(is_wallet_created());
+    }
 
     #[test]
     fn test_create_mnemonic() {

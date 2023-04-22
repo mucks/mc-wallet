@@ -1,44 +1,31 @@
 package dev.mucks.mc_wallet.gui;
 
 import dev.mucks.mc_wallet.McWallet;
-import dev.mucks.mc_wallet_lib.McWalletLib;
-import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
-import io.github.cottonmc.cotton.gui.widget.WButton;
-import io.github.cottonmc.cotton.gui.widget.WGridPanel;
-import io.github.cottonmc.cotton.gui.widget.WLabel;
-import io.github.cottonmc.cotton.gui.widget.WText;
-import net.minecraft.text.Style;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.screen.v1.Screens;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 
-public class McWalletGui extends LightweightGuiDescription {
+public class McWalletGui {
 
-    public McWalletGui() {
-        WGridPanel root = new WGridPanel();
-        setRootPanel(root);
-
-        root.setSize(300, 200);
-
-        WLabel label = new WLabel(Text.of("MC Wallet"));
-        root.add(label, 1, 1);
-
-        WButton button = new WButton(Text.of("Create Seed Phrase"));
-        root.add(button, 1, 2, 10, 10);
-
-        WText mnemonicText = new WText(Text.of(""));
-        mnemonicText.setSize(10, 10);
-        root.add(mnemonicText, 1, 4, 10, 10);
-
-        button.setOnClick(() -> {
-            String mnemonic = McWallet.MOD_LIB.createMnemonicRust();
-
-            Text tmm = Text.of(mnemonic);
-            tmm.getStyle().withColor(Formatting.WHITE);
-
-            mnemonicText.setText(tmm);
+    public static void init() {
+        ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+            if (screen instanceof InventoryScreen) {
+                Screens.getButtons(screen).add(ButtonWidget.builder(Text.literal("wallet"), (btn) -> {
+                    onWalletButtonClick(client);
+                }).build());
+            }
         });
-
-        root.validate(this);
     }
 
+    private static void onWalletButtonClick(MinecraftClient client) {
+
+        if (McWallet.MOD_LIB.isWalletCreated()) {
+            client.setScreen(new McWalletScreen(new WalletGui()));
+        } else {
+            client.setScreen(new McWalletScreen(new CreateWalletGui()));
+        }
+    }
 }
