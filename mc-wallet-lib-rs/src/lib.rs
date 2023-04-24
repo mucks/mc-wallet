@@ -7,8 +7,10 @@ use serde::{Deserialize, Serialize};
 use util::mc_wallet_dir;
 
 mod account;
+mod coin_type;
 mod crypto;
 mod java;
+mod state;
 mod storage;
 mod util;
 
@@ -73,13 +75,6 @@ pub fn get_seed(encryption_password: &str) -> Result<Seed> {
         .map_err(|_| anyhow!("could not convert seed bytes to fixed size array!"))?;
 
     Ok(Seed::new(seed_bytes_fixed))
-}
-
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
-pub enum CoinType {
-    ETH = 60,
-    SOL = 501,
-    SUI = 784,
 }
 
 #[cfg(test)]

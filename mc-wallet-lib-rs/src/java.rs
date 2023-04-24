@@ -8,6 +8,7 @@ use jni::{
 use crate::{
     create_and_save_seed, create_config_dir, create_mnemonic, create_wallet, get_seed,
     is_wallet_created,
+    state::{is_wallet_unlocked, unlock_wallet},
 };
 
 fn jstring_to_string(env: &mut JNIEnv, jstring: JString) -> String {
@@ -16,6 +17,29 @@ fn jstring_to_string(env: &mut JNIEnv, jstring: JString) -> String {
         .to_str()
         .expect("Couldn't convert java string to rust string!")
         .to_owned()
+}
+
+#[no_mangle]
+pub extern "system" fn Java_dev_mucks_mc_1wallet_1lib_McWalletLib_unlockWallet(
+    mut env: JNIEnv,
+    _obj: JObject,
+    wallet_password: JString,
+) {
+    let wallet_password = jstring_to_string(&mut env, wallet_password);
+
+    if let Err(_err) = unlock_wallet(&wallet_password) {
+        env.throw("could not unlock wallet! wrong password")
+            .unwrap();
+    }
+}
+
+#[no_mangle]
+pub extern "system" fn Java_dev_mucks_mc_1wallet_1lib_McWalletLib_isWalletUnlocked(
+    _env: JNIEnv,
+    _obj: JObject,
+) -> jboolean {
+    let is_wallet_unlocked = is_wallet_unlocked();
+    jboolean::from(is_wallet_unlocked)
 }
 
 #[no_mangle]

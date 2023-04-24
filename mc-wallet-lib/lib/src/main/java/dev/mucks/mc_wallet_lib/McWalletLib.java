@@ -31,4 +31,8 @@ public class McWalletLib {
 
     public native boolean isWalletCreated();
 
+    public native String unlockWallet(String walletPassword);
+
+    public native boolean isWalletUnlocked();
+
 }

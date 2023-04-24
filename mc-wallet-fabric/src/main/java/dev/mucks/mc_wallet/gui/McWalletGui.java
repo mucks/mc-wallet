@@ -23,7 +23,11 @@ public class McWalletGui {
     private static void onWalletButtonClick(MinecraftClient client) {
 
         if (McWallet.MOD_LIB.isWalletCreated()) {
-            client.setScreen(new McWalletScreen(new WalletGui()));
+            if (McWallet.MOD_LIB.isWalletUnlocked()) {
+                client.setScreen(new McWalletScreen(new WalletGui()));
+            } else {
+                client.setScreen(new McWalletScreen(new UnlockWalletGui()));
+            }
         } else {
             client.setScreen(new McWalletScreen(new CreateWalletGui()));
         }

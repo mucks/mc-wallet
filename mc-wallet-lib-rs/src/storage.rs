@@ -8,6 +8,13 @@ pub struct Storage {
 }
 
 impl Storage {
+    pub fn add_account(account: Account) -> Result<()> {
+        let mut storage = Self::get_from_file()?;
+        storage.accounts.push(account);
+        storage.save_to_file()?;
+        Ok(())
+    }
+
     pub fn get_from_file() -> Result<Self> {
         let storage_file = mc_wallet_dir()?.join("storage.json");
         let storage_json = std::fs::read_to_string(storage_file)?;

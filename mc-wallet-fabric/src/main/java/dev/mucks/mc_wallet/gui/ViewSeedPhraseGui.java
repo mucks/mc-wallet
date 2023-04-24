@@ -1,6 +1,5 @@
 package dev.mucks.mc_wallet.gui;
 
-import dev.mucks.mc_wallet.McWallet;
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.WButton;
 import io.github.cottonmc.cotton.gui.widget.WGridPanel;
