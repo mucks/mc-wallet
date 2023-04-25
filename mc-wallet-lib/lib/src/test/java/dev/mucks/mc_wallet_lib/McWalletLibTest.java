@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.ArrayList;
+
 class McWalletLibTest {
     static boolean test = true;
 
@@ -19,10 +21,9 @@ class McWalletLibTest {
     }
 
     @Test
-    void testGetAccountsRust() {
-        Account account = McWalletLib.getAccountsRust();
-
-        assertNotNull(account.address);
-
+    void testCreateAndGetAccountsRust() {
+        ArrayList<Account> accounts = McWalletLib.getAccountsRust(true);
+        assertNotNull(accounts);
+        assertTrue(accounts.size() > 0);
     }
 }

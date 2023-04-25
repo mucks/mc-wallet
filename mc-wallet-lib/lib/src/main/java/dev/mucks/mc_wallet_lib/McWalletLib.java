@@ -5,6 +5,7 @@ package dev.mucks.mc_wallet_lib;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 public class McWalletLib {
 
@@ -39,7 +40,7 @@ public class McWalletLib {
         return isWalletUnlockedRust();
     }
 
-    static native Account getAccountsRust();
+    static native ArrayList<Account> getAccountsRust(boolean test);
 
     static native void createAccountRust(int coinType);
 

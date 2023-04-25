@@ -1,13 +1,14 @@
+use bip32::Seed;
 use jni::{
-    objects::{JObject, JObjectArray, JString, JValue},
-    sys::{jboolean, jint},
+    objects::{JList, JObject, JObjectArray, JString, JValue, JValueGen},
+    sys::{jboolean, jint, jobject},
     JNIEnv,
 };
 
 use anyhow::Result;
 
 use crate::{
-    account::create_account,
+    account::{create_account, Account},
     coin_type::CoinType,
     state::{get_seed_from_state, is_wallet_unlocked},
     storage::FileStorage,
@@ -46,15 +47,42 @@ pub extern "system" fn Java_dev_mucks_mc_1wallet_1lib_McWalletLib_createAccountR
 pub extern "system" fn Java_dev_mucks_mc_1wallet_1lib_McWalletLib_getAccountsRust<'local>(
     mut env: JNIEnv<'local>,
     _obj: JObject<'local>,
+    test: jboolean,
 ) -> JObject<'local> {
-    let address = env.new_string("hello").unwrap();
-    let addr_value = JValue::from(&address);
+    let arraylist_class = env.find_class("java/util/ArrayList").unwrap();
+
+    let arraylist_obj = env
+        .new_object(arraylist_class, "(I)V", &[JValue::Int(0)])
+        .unwrap();
+
+    let arraylist: JList = JList::from_env(&mut env, &arraylist_obj).unwrap();
+
     let class = env
         .find_class("dev/mucks/mc_wallet_lib/Account")
         .expect("failed to find Account class");
 
-    env.new_object(class, "(Ljava/lang/String;)V", &[addr_value])
-        .unwrap()
+    let accounts = match test != 0 {
+        true => vec![Account::new(CoinType::Eth, 1, &Seed::new([0; 64])).unwrap()],
+        false => java_get_accounts().expect("could not get accounts from storage"),
+    };
+
+    for i in 0..accounts.len() {
+        let address = env.new_string(&accounts[i].address).unwrap();
+        let addr_value = JValue::from(&address);
+
+        let obj = env
+            .new_object(&class, "(Ljava/lang/String;)V", &[addr_value])
+            .unwrap();
+
+        arraylist.add(&mut env, &obj).unwrap();
+    }
+
+    arraylist_obj
+}
+
+fn java_get_accounts() -> Result<Vec<Account>> {
+    let mut s = FileStorage::get_from_file()?;
+    Ok(s.accounts)
 }
 
 fn java_create_account(coin_type: i32) -> Result<()> {

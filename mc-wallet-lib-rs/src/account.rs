@@ -1,16 +1,12 @@
 use anyhow::Result;
-use bip32::{Seed, XPrv};
+use bip32::Seed;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    coin_type::CoinType,
-    storage::{self, Storage},
-    util::gen_private_key,
-};
+use crate::{coin_type::CoinType, storage::Storage, util::gen_private_key};
 
 pub fn create_account(seed: &Seed, coin_type: CoinType, storage: &mut dyn Storage) -> Result<()> {
     let rnd_index = storage.get_new_account_index()?;
-    let account = Account::new(coin_type, rnd_index, &seed)?;
+    let account = Account::new(coin_type, rnd_index, seed)?;
     storage.add_account(account)?;
     Ok(())
 }
@@ -43,11 +39,13 @@ impl Account {
 
 #[cfg(test)]
 mod tests {
+    use crate::storage::MemStorage;
+
     use super::*;
 
     #[test]
     fn test_create_account() -> Result<()> {
-        let mut storage = storage::MemStorage::new();
+        let mut storage = MemStorage::new();
         let res = storage.create_seed("password")?;
         create_account(&res.seed, CoinType::Eth, &mut storage)?;
         Ok(())
