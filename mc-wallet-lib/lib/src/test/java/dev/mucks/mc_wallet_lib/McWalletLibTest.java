@@ -11,11 +11,18 @@ class McWalletLibTest {
     static boolean test = true;
 
     @Test
-    void createWalletRust() {
-        McWalletLib lib = new McWalletLib();
+    void testCreateWalletRust() {
         String password = "password";
-        String mnemonic = lib.createWalletRust(password, true);
+        String mnemonic = McWalletLib.createWalletRust(password, true);
         assertNotNull(mnemonic);
         assertTrue(mnemonic.length() > 0);
+    }
+
+    @Test
+    void testGetAccountsRust() {
+        Account account = McWalletLib.getAccountsRust();
+
+        assertNotNull(account.address);
+
     }
 }

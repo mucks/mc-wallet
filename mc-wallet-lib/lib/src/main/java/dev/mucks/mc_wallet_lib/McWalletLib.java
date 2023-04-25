@@ -19,28 +19,36 @@ public class McWalletLib {
         return libPath;
     }
 
-    public String createWallet(String password) {
+    public static void createAccount(CoinType coinType) {
+        createAccountRust(coinType.asInteger());
+    }
+
+    public static String createWallet(String password) {
         return createWalletRust(password, false);
     }
 
-    public boolean isWalletCreated() {
+    public static boolean isWalletCreated() {
         return isWalletCreatedRust();
     }
 
-    public String unlockWallet(String password) {
+    public static String unlockWallet(String password) {
         return unlockWalletRust(password);
     }
 
-    public boolean isWalletUnlocked() {
+    public static boolean isWalletUnlocked() {
         return isWalletUnlockedRust();
     }
 
-    native String createWalletRust(String password, boolean test);
+    static native Account getAccountsRust();
 
-    native boolean isWalletCreatedRust();
+    static native void createAccountRust(int coinType);
 
-    native String unlockWalletRust(String password);
+    static native String createWalletRust(String password, boolean test);
 
-    native boolean isWalletUnlockedRust();
+    static native boolean isWalletCreatedRust();
+
+    static native String unlockWalletRust(String password);
+
+    static native boolean isWalletUnlockedRust();
 
 }
