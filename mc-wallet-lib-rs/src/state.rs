@@ -4,7 +4,10 @@ use anyhow::Result;
 use bip32::{Seed, XPrv};
 use lazy_static::lazy_static;
 
-use crate::{get_seed, util::clone_seed};
+use crate::{
+    storage::{self, Storage},
+    util::clone_seed,
+};
 
 pub struct State {
     pub seed: Option<Seed>,
@@ -34,11 +37,11 @@ pub fn lock_wallet() -> Result<()> {
     Ok(())
 }
 
-pub fn unlock_wallet(encryption_password: &str) -> Result<()> {
+pub fn state_unlock_wallet(encryption_password: &str, storage: &dyn Storage) -> Result<()> {
     let mut state = STATE
         .lock()
         .map_err(|err| anyhow::anyhow!("could not lock state: {err}"))?;
-    let seed = get_seed(encryption_password)?;
+    let seed = storage.get_seed(encryption_password)?;
     state.seed = Some(seed);
     Ok(())
 }
@@ -52,16 +55,21 @@ pub fn is_wallet_unlocked() -> bool {
 
 #[cfg(test)]
 mod tests {
+    use crate::storage::{MemStorage, Storage};
+
     use super::*;
-    use crate::{create_and_save_seed, create_mnemonic};
 
     #[test]
-    fn test_unlock_wallet() {
-        let mnemonic = create_mnemonic();
-        create_and_save_seed(&mnemonic, "password", "encryption_password").unwrap();
-        unlock_wallet("encryption_password").unwrap();
+    fn test_unlock_wallet() -> Result<()> {
+        let id = uuid::Uuid::new_v4().to_string();
+        let mut storage = MemStorage::new();
+        let password = "encryption_password";
+        let res = storage.create_seed(password);
+
+        state_unlock_wallet(password, &storage)?;
         assert!(is_wallet_unlocked());
-        lock_wallet().unwrap();
+        lock_wallet()?;
         assert!(!is_wallet_unlocked());
+        Ok(())
     }
 }

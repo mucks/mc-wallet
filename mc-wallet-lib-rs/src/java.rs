@@ -1,14 +1,14 @@
 use jni::{
     objects::{JObject, JString},
     sys::jboolean,
-    sys::jint,
     JNIEnv,
 };
 
+use anyhow::Result;
+
 use crate::{
-    create_and_save_seed, create_config_dir, create_mnemonic, create_wallet, get_seed,
-    is_wallet_created,
-    state::{is_wallet_unlocked, unlock_wallet},
+    state::is_wallet_unlocked,
+    wallet::{create_wallet, is_wallet_created, test_create_wallet},
 };
 
 fn jstring_to_string(env: &mut JNIEnv, jstring: JString) -> String {
@@ -20,97 +20,58 @@ fn jstring_to_string(env: &mut JNIEnv, jstring: JString) -> String {
 }
 
 #[no_mangle]
-pub extern "system" fn Java_dev_mucks_mc_1wallet_1lib_McWalletLib_unlockWallet(
-    mut env: JNIEnv,
-    _obj: JObject,
-    wallet_password: JString,
-) {
-    let wallet_password = jstring_to_string(&mut env, wallet_password);
+pub extern "system" fn Java_dev_mucks_mc_1wallet_1lib_McWalletLib_createWalletRust<'local>(
+    mut env: JNIEnv<'local>,
+    _obj: JObject<'local>,
+    password: JString<'local>,
+    test: jboolean,
+) -> JString<'local> {
+    let password = jstring_to_string(&mut env, password);
+    let res = create_wallet_rust(test != 0, &password);
+    match res {
+        Ok(mnemonic) => env.new_string(mnemonic).unwrap(),
+        Err(err) => {
+            env.throw(format!("Could not create wallet {err}")).unwrap();
+            env.new_string("ERROR").unwrap()
+        }
+    }
+}
 
-    if let Err(_err) = unlock_wallet(&wallet_password) {
-        env.throw("could not unlock wallet! wrong password")
-            .unwrap();
+fn create_wallet_rust(test: bool, password: &str) -> Result<String> {
+    if test {
+        test_create_wallet(password)
+    } else {
+        create_wallet(password)
     }
 }
 
 #[no_mangle]
-pub extern "system" fn Java_dev_mucks_mc_1wallet_1lib_McWalletLib_isWalletUnlocked(
+pub extern "system" fn Java_dev_mucks_mc_1wallet_1lib_McWalletLib_isWalletCreatedRust(
     _env: JNIEnv,
     _obj: JObject,
 ) -> jboolean {
-    let is_wallet_unlocked = is_wallet_unlocked();
-    jboolean::from(is_wallet_unlocked)
+    is_wallet_created() as u8
 }
 
 #[no_mangle]
-pub extern "system" fn Java_dev_mucks_mc_1wallet_1lib_McWalletLib_isWalletCreated(
-    _env: JNIEnv,
-    _obj: JObject,
-) -> jboolean {
-    let is_wallet_created = is_wallet_created();
-    jboolean::from(is_wallet_created)
-}
-
-#[no_mangle]
-pub extern "system" fn Java_dev_mucks_mc_1wallet_1lib_McWalletLib_createWallet<'local>(
-    mut env: JNIEnv<'local>,
-    _obj: JObject<'local>,
-    wallet_password: JString,
-) -> JString<'local> {
-    let wallet_password = jstring_to_string(&mut env, wallet_password);
-    let mnemonic = create_wallet(wallet_password)
-        .map_err(|err| anyhow::anyhow!("could not create wallet: {}", err))
-        .unwrap();
-    env.new_string(mnemonic)
-        .expect("Couldn't create java string!")
-}
-
-#[no_mangle]
-pub extern "system" fn Java_dev_mucks_mc_1wallet_1lib_McWalletLib_createAndSaveSeed(
+pub extern "system" fn Java_dev_mucks_mc_1wallet_1lib_McWalletLib_unlockWalletRust(
     mut env: JNIEnv,
     _obj: JObject,
-    mnemonic: JString,
-    // the password is used as an extra layer of security when creating the seed from the mnemonic
-    seed_password: JString,
-    encryption_password: JString,
+    password: JString,
 ) {
-    let mnemonic = jstring_to_string(&mut env, mnemonic);
-    let seed_password = jstring_to_string(&mut env, seed_password);
-    let encryption_password = jstring_to_string(&mut env, encryption_password);
-
-    create_and_save_seed(&mnemonic, &seed_password, &encryption_password)
-        .map_err(|err| anyhow::anyhow!("could not create and save seed: {}", err))
-        .unwrap();
+    let wallet_password = jstring_to_string(&mut env, password);
+    match crate::wallet::unlock_wallet(&wallet_password) {
+        Ok(_) => {}
+        Err(err) => {
+            env.throw(format!("Could not unlock wallet {err}")).unwrap();
+        }
+    }
 }
 
 #[no_mangle]
-pub extern "system" fn Java_dev_mucks_mc_1wallet_1lib_McWalletLib_getSeedHex<'local>(
-    mut env: JNIEnv<'local>,
-    _obj: JObject<'local>,
-    encryption_password: JString,
-) -> JString<'local> {
-    let encryption_password = jstring_to_string(&mut env, encryption_password);
-    let seed = get_seed(&encryption_password)
-        .map_err(|err| anyhow::anyhow!("could not get seed: {}", err))
-        .unwrap();
-    let seed = hex::encode(seed.as_bytes());
-    env.new_string(seed).expect("Couldn't create java string!")
-}
-
-#[no_mangle]
-pub extern "system" fn Java_dev_mucks_mc_1wallet_1lib_McWalletLib_createConfigDir(
+pub extern "system" fn Java_dev_mucks_mc_1wallet_1lib_McWalletLib_isWalletUnlockedRust(
     _env: JNIEnv,
     _obj: JObject,
-) {
-    create_config_dir().expect("could not create config dir!");
-}
-
-#[no_mangle]
-pub extern "system" fn Java_dev_mucks_mc_1wallet_1lib_McWalletLib_createMnemonic<'local>(
-    env: JNIEnv<'local>,
-    _obj: JObject,
-) -> JString<'local> {
-    let mnemonic = create_mnemonic();
-    env.new_string(mnemonic)
-        .expect("Couldn't create java string!")
+) -> jboolean {
+    is_wallet_unlocked() as u8
 }

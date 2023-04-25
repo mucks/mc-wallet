@@ -19,20 +19,28 @@ public class McWalletLib {
         return libPath;
     }
 
-    public native int createConfigDir();
+    public String createWallet(String password) {
+        return createWalletRust(password, false);
+    }
 
-    public native String createMnemonic();
+    public boolean isWalletCreated() {
+        return isWalletCreatedRust();
+    }
 
-    public native void createAndSaveSeed(String mnemonic, String seedPassword, String encryptionPassword);
+    public String unlockWallet(String password) {
+        return unlockWalletRust(password);
+    }
 
-    public native String getSeedHex(String encryptionPassword);
+    public boolean isWalletUnlocked() {
+        return isWalletUnlockedRust();
+    }
 
-    public native String createWallet(String walletPassword);
+    native String createWalletRust(String password, boolean test);
 
-    public native boolean isWalletCreated();
+    native boolean isWalletCreatedRust();
 
-    public native String unlockWallet(String walletPassword);
+    native String unlockWalletRust(String password);
 
-    public native boolean isWalletUnlocked();
+    native boolean isWalletUnlockedRust();
 
 }

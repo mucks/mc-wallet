@@ -2,7 +2,18 @@ use anyhow::Result;
 use bip32::{Seed, XPrv};
 use serde::{Deserialize, Serialize};
 
-use crate::{coin_type::CoinType, util::gen_private_key};
+use crate::{
+    coin_type::CoinType,
+    storage::{self, Storage},
+    util::gen_private_key,
+};
+
+pub fn create_account(seed: &Seed, coin_type: CoinType, storage: &mut dyn Storage) -> Result<()> {
+    let rnd_index = storage.get_new_account_index()?;
+    let account = Account::new(coin_type, rnd_index, &seed)?;
+    storage.add_account(account)?;
+    Ok(())
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Account {
@@ -28,9 +39,17 @@ impl Account {
             child_path,
         })
     }
+}
 
-    pub fn new_with_random_index(coin_type: CoinType, seed: &Seed) -> Result<Self> {
-        let account_index = rand::random::<u32>();
-        Self::new(coin_type, account_index, seed)
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_create_account() -> Result<()> {
+        let mut storage = storage::MemStorage::new();
+        let res = storage.create_seed("password")?;
+        create_account(&res.seed, CoinType::Eth, &mut storage)?;
+        Ok(())
     }
 }

@@ -8,52 +8,14 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class McWalletLibTest {
+    static boolean test = true;
 
     @Test
-    void createConfigDir() {
+    void createWalletRust() {
         McWalletLib lib = new McWalletLib();
-        lib.createConfigDir();
-    }
-
-    @Test
-    void createMnemonicRust() {
-        McWalletLib lib = new McWalletLib();
-        String mnemonic = lib.createMnemonic();
+        String password = "password";
+        String mnemonic = lib.createWalletRust(password, true);
         assertNotNull(mnemonic);
         assertTrue(mnemonic.length() > 0);
     }
-
-    @Test
-    void createAndSaveSeed() {
-        McWalletLib lib = new McWalletLib();
-        String mnemonic = lib.createMnemonic();
-        lib.createAndSaveSeed(mnemonic, "password", "password");
-    }
-
-    @Test
-    void createAndSaveSeedWithPassword() {
-        McWalletLib lib = new McWalletLib();
-        String mnemonic = lib.createMnemonic();
-        lib.createAndSaveSeed(mnemonic, "password", "password");
-    }
-
-    @Test
-    void getSeed() {
-        McWalletLib lib = new McWalletLib();
-        String mnemonic = lib.createMnemonic();
-        lib.createAndSaveSeed(mnemonic, "password", "password");
-        String seed = lib.getSeedHex("password");
-        assertNotNull(seed);
-        assertTrue(seed.length() > 0);
-    }
-
-    @Test
-    void createWallet() {
-        McWalletLib lib = new McWalletLib();
-        String wallet = lib.createWallet("password");
-        assertNotNull(wallet);
-        assertTrue(wallet.length() > 0);
-        assertTrue(lib.isWalletCreated());
-    }
-
 }

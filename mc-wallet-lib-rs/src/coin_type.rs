@@ -9,6 +9,19 @@ pub enum CoinType {
     Sui = 784,
 }
 
+impl TryFrom<i32> for CoinType {
+    type Error = anyhow::Error;
+
+    fn try_from(value: i32) -> std::result::Result<Self, Self::Error> {
+        match value {
+            60 => Ok(CoinType::Eth),
+            501 => Ok(CoinType::Sol),
+            784 => Ok(CoinType::Sui),
+            _ => Err(anyhow::anyhow!("invalid coin type")),
+        }
+    }
+}
+
 impl CoinType {
     pub fn address(&self, public_key: &[u8]) -> Result<String> {
         eth_address(public_key)
